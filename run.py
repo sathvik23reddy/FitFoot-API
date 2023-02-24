@@ -1,3 +1,4 @@
-from api import image_query
+from api import app
 
-app = image_query()
+if __name__ == "__main__":
+    app.run()
