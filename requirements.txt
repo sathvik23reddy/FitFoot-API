@@ -2,4 +2,4 @@ Flask
 gunicorn
 rembg
 pillow
-opencv
+opencv-python
