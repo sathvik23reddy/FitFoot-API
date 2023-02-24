@@ -1,3 +1,4 @@
+/opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
 Flask
 gunicorn
 rembg
