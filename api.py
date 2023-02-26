@@ -24,9 +24,12 @@ def image_query():
 
     with open("top_prof.png", "wb") as fh:
         fh.write(base64.decodebytes(b64top))
-    print("Arch height = " + str(process_side_profile()) +
-          "\nToe Width = " + str(process_top_profile()))
-    return "Arch height = " + str(process_side_profile()) + "\nToe Width = " + str(process_top_profile())
+
+    arch_h = process_side_profile()
+    toe_width = process_top_profile()
+    print("Arch height = " + str(arch_h) +
+          "\nToe Width = " + str(toe_width))
+    return "Arch height = " + str(arch_h) + "\nToe Width = " + str(toe_width)
 
 
 def process_side_profile():
