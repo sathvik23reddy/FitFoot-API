@@ -5,13 +5,16 @@ from rembg import remove
 from PIL import Image
 import sys
 import base64
-
+import socket
 
 app = Flask(__name__)
+
+socket.setdefaulttimeout(300)
 
 
 @app.route('/', methods=['GET', 'POST'])
 def image_query():
+
     input_query = request.get_json()
     b64side = input_query['Image1']
     b64side = bytes(b64side, 'utf-8')
@@ -25,11 +28,10 @@ def image_query():
     with open("top_prof.png", "wb") as fh:
         fh.write(base64.decodebytes(b64top))
 
-    arch_h = process_side_profile()
-    toe_width = process_top_profile()
-    print("Arch height = " + str(arch_h) +
-          "\nToe Width = " + str(toe_width))
-    return "Arch height = " + str(arch_h) + "\nToe Width = " + str(toe_width)
+    return {
+        "arch_height" : process_side_profile(),
+        "toe_width" : process_top_profile()
+    }
 
 
 def process_side_profile():
@@ -51,7 +53,6 @@ def process_side_profile():
 
     flag = 0
     for i in range(len(thresh)-1, -1, -1):
-        # print(i)
         arr = thresh[i]
         l, r = 0, len(arr)-1
         if(len(set(arr)) == 1):
@@ -78,7 +79,6 @@ def process_side_profile():
         if(x < min):
             min = x
             minI = i
-    print(minI, min)
 
     for j in range(minI+1, len(thresh)):
         arr = thresh[j]
@@ -90,7 +90,6 @@ def process_side_profile():
         if(max <= (r-l+1)):
             max = r-l+1
             maxI = j
-    print(maxI, max)
 
     arch_h = (maxI-minI)/len(thresh)
     return (arch_h)
