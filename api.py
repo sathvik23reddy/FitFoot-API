@@ -1,11 +1,14 @@
 from flask import Flask, request
 import cv2
+import pandas as pd
 import numpy as np
 from rembg import remove
 from PIL import Image
 import sys
 import base64
 import socket
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 
 app = Flask(__name__)
 
@@ -28,10 +31,53 @@ def image_query():
     with open("top_prof.png", "wb") as fh:
         fh.write(base64.decodebytes(b64top))
 
+    arch_height = process_side_profile()
+    toe_width = process_top_profile()
+    arch_pred = predict_arch(arch_height)
+    toe_pred = predict_toe(toe_width)
+
+    print(arch_pred)
+    print(toe_pred)
     return {
-        "arch_height" : process_side_profile(),
-        "toe_width" : process_top_profile()
+        "arch_height" : arch_height,
+        "toe_width" : toe_width,
+        "arch_type" : arch_pred, 
+        "toe_type" : toe_pred
     }
+
+def predict_toe(toe_width):
+    data = pd.read_csv(r"C:\Users\Sathvik\Desktop\Project\ML Model\CSV Toe Width.csv", header=None)
+    data = pd.DataFrame(data)
+    x = np.array(data.iloc[:, 0])
+    y = np.array(data.iloc[:, 1])
+    knn = KNeighborsClassifier(n_neighbors=10)
+    x = x.reshape(-1, 1)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1)
+    knn.fit(x_train, y_train)
+    res = knn.predict([[toe_width]])[0]
+    if res==0:
+        return 'Normal Toe Box'
+    else:
+        return 'Wide Toe Box'
+
+def predict_arch(arch_height):
+    if arch_height == -1:
+        return 'Please recapture image'
+    data = pd.read_csv(r"C:\Users\Sathvik\Desktop\Project\ML Model\CSV Arch Height.csv", header=None)
+    data = pd.DataFrame(data)
+    x = np.array(data.iloc[:, 0])
+    y = np.array(data.iloc[:, 1])
+    knn = KNeighborsClassifier(n_neighbors=10)
+    x = x.reshape(-1, 1)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1)
+    knn.fit(x_train, y_train)
+    res = knn.predict([[arch_height]])[0]
+    if res==0:
+        return 'Flat Arch'
+    elif res==1:
+        return 'Normal Arch'
+    else:
+        return 'High Arch'
 
 
 def process_side_profile():
