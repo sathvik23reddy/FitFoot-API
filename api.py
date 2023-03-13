@@ -55,44 +55,44 @@ def process_side_profile():
     for i in range(len(thresh)-1, -1, -1):
         arr = thresh[i]
         l, r = 0, len(arr)-1
-        if(len(set(arr)) == 1):
-            continue
-        while(arr[l] == 0 and l < r):
-            l += 1
-        while(arr[r] == 0 and l < r):
-            r -= 1
-        while(arr[l] == 255 and l < r):
-            l += 1
-        if(l >= r):
-            if(flag == 0):
+        if(len(set(arr))==1): continue
+        while(arr[l]==0 and l<r): 
+            l+=1
+        while(arr[r]==0 and l<r): 
+            r-=1
+        lf = l
+        while(arr[l] == 255 and l<r): 
+            l+=1
+        if(l>=r):
+            if(flag==0):
                 flag = 1
                 continue
-            elif(flag == 1):
+            elif(flag==1): 
                 continue
-            else:
-                break
-        while(arr[r] == 255 and l < r):
-            r -= 1
-        if(flag == 1):
-            flag += 1
+            else: break
+        rf = r
+        while(arr[r]==255 and l<r): r-=1
+        if len(set(arr[l:r+1]))>1:
+                continue
+        if ((rf-lf+1)>=len(arr)*0.8):
+            minI = i
+            min = rf-lf+1
+        if(flag==1): flag+=1
         x = r-l+1
-        if(x < min):
+        if(x<((len(arr)/100)*0.5)): continue
+        if(x<min): 
             min = x
             minI = i
 
+    if(min == sys.maxsize):
+        return -1
     for j in range(minI+1, len(thresh)):
         arr = thresh[j]
-        l, r = 0, len(arr)-1
-        while(arr[l] == 0 and l < r):
-            l += 1
-        while(arr[r] == 0 and r >= l):
-            r -= 1
-        if(max <= (r-l+1)):
-            max = r-l+1
+        if(len(set(arr))==2):
             maxI = j
 
-    arch_h = (maxI-minI)/len(thresh)
-    return (arch_h)
+    arch_h = (maxI-minI)/len(thresh[0])
+    return arch_h
 
 
 def process_top_profile():
@@ -107,25 +107,23 @@ def process_top_profile():
     hull = [cv2.convexHull(c) for c in cont]
     fin = cv2.drawContours(foot, hull, -1, (255, 255, 255))
 
-    contours = np.vstack(fin).squeeze()
-    max = dimensionUtil(contours)
-    totalW = contours.shape[1]
+    max = dimensionUtil(thresh)
+    totalW = len(thresh[0])
     toeWidth = max/totalW
     return toeWidth
 
 
 def dimensionUtil(contours):
-    cmax = 0
-    for x in contours:
-        count = 0
-        for i in x:
-            if i != 0:
-                count += 1
-            else:
-                if count > cmax:
-                    cmax = count
-                count = 0
-    return cmax
+  cmax=0
+  for x in contours:
+        if(len(set(x))==1): continue
+        l, r =0, len(x)-1
+        while(x[l]==0): l+=1
+        while(x[r]==0): r-=1
+        if(l>r): continue
+        y = r-l+1
+        if(cmax<y): cmax= y
+  return cmax
 
 
 if __name__ == "__main__":
